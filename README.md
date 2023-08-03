@@ -38,6 +38,20 @@ snippet update toff
 snippet load-all
 ```
 
+## Tips
+
+Want to look at results one at a time? Set batchSize to 1, then you can iterate through the results with `it`. After you're done you can reset the batch size:
+
+```js
+config.set("displayBatchSize", 1)
+
+toff().show()
+
+// Iterate through results with it
+
+config.reset("displayBatchSize")
+```
+
 ## Examples
 
 Show the oplog. By default it's in reverse timestamp order (newest to oldest):
