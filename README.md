@@ -20,3 +20,10 @@ toff.help()
 ```
 
 I recommend setting `config.set("inspectDepth", Infinity)` to make sure nested oplog entries are fully parsed. If this causes problems with parsing extremely nested documents you can always set it to a finite number. 
+
+Updating toff:
+
+```
+snippet update toff
+snippet load-all
+```
