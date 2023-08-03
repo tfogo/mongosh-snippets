@@ -1,4 +1,6 @@
-# mongosh-snippets
+# Toff: Tim's Opglog Filtering Functions
+
+![Bertie Wooster](bertie.gif)
 
 Run:
 
