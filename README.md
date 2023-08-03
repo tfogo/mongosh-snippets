@@ -19,4 +19,4 @@ View Toff help:
 toff.help()
 ```
 
-To  auto update snippets, you can copy the contents of `.mongoshrc.js` into your `~/.mongoshrc.js`. This also sets the `inspectDepth` to infinity.
+I recommend setting `config.set("inspectDepth", Infinity)` to make sure nested oplog entries are fully parsed. If this causes problems with parsing extremely nested documents you can always set it to a finite number. 
