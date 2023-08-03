@@ -1,0 +1,363 @@
+class Oplog {
+    constructor() {
+        this.oplog = db.getSiblingDB("local").oplog.rs
+        this.pipeline = []
+        this.noop = false
+        this.config = false
+        this.sort = false
+        this.shouldCompact = false
+        this.limitNum = null
+        this.projection = null
+        this.options = { "allowDiskUse": true }
+    }
+
+    help() {
+        print("\u001b[1m\nUSAGE:\u001b[0m")
+        print("\tops() helps printing oplog entries. Chain commands together then .show().")
+        print("\tBy default noops and the config db are ommitted.")
+        print("\tWhen filtering by namespace, db, command, _id, and op, we search both top-level")
+        print("\toperations and sub-operations in applyOps. That way you do not miss anything")
+        print("\tthat is part of a transaction.\n")
+
+        print("\u001b[1mEXAMPLES:\u001b[0m")
+        print("\tShow the oplog. By default it's in reverse timestamp order (newest to oldest):")
+        print("\t\u001b[32mops().show()\u001b[0m\n")
+
+        print("\tShow the last 5 oplog entries:")
+        print("\t\u001b[32mops().limit(5).show()\u001b[0m\n")
+
+        print("\tShow the oplog from oldest to newest:")
+        print("\t\u001b[32mops().forward().show()\u001b[0m\n")
+
+        print("\tShow the oplog from oldest to newest from timestamp { t: 1690828162, i: 786 }:")
+        print("\t\u001b[32mops().forward().after({ t: 1690828162, i: 786 }).show()\u001b[0m\n")
+
+        print("\tShow the oplog from oldest to newest before timestamp { t: 1690828162, i: 786 }:")
+        print("\t\u001b[32mops().forward().before({ t: 1690828162, i: 786 }).show()\u001b[0m\n")
+
+        print("\tShow the oplog between wall times \"2023-07-31T18:29:19.037889997Z\" and \"2023-07-31T18:29:19.081624304Z\":")
+        print("\tNote: wall times from mongosync logs may not correspond directly to the wall times in the oplog.")
+        print("\t\u001b[32mops().afterWall(\"2023-07-31T18:29:19.037889997Z\").beforeWall(\"2023-07-31T18:29:19.081624304Z\").show()\u001b[0m\n")
+
+        print("\tShow only inserts into the partitions collection:")
+        print("\t\u001b[32mops().ns(\"mongosync_reserved_for_internal_use.partitions\").op(\"i\").show()\u001b[0m\n")
+
+        print("\tShow only createIndexes commands:")
+        print("\t\u001b[32mops().command(\"createIndexes\").show()\u001b[0m\n")
+
+        print("\tShow only the mongosync_reserved_for_internal_use database except for globalState:")
+        print("\t\u001b[32mops().db(\"mongosync_reserved_for_internal_use\").excludeNs(\"globalState\").show()\u001b[0m\n")
+
+        print("\tShow all operations on the admin.$cmd namespace:")
+        print("\t\u001b[32mops().ns(\"admin.$cmd\").show()\u001b[0m\n")
+
+        print("\tFind all ops in transaction 6753 for lsid.id \"d94483c0-5d07-4b05-8b9b-a0c18cc495fa\":")
+        print("\t\u001b[32mops().txn(6753, \"d94483c0-5d07-4b05-8b9b-a0c18cc495fa\").show()\u001b[0m\n")
+
+        print("\tFind operations on docs with _id \"64c7f9f11a4c236a31f5c6c4\":")
+        print("\t\u001b[32mops().byID(\"64c7f9f11a4c236a31f5c6c4\").show()\u001b[0m\n")
+
+        print("\tCount how many times the document with _id 8 was inserted into test.melon:")
+        print("\t\u001b[32mops().op(\"i\").ns(\"test.melon\").byID(8).count()\u001b[0m\n")
+
+        print("\tUse a projection to show only the timestamps for ops where _id 8 was inserted into test.melon:")
+        print("\t\u001b[32mops().op(\"i\").ns(\"test.melon\").byID(8).project({\"ts\":1}).show()\u001b[0m\n")
+
+        print("\tUse a custom $match query to find updates which set the field a to 10:")
+        print("\t\u001b[32mops().op(\"u\").match({\"o.a\": 10}).show()\u001b[0m\n")
+        
+        print("\u001b[1mREFERENCE:\u001b[0m")
+        print("\t\u001b[32mincludeNoop()\u001b[0m\t\tIncludes noop operations")
+        print("\t\u001b[32mincludeConfig()\u001b[0m\t\tIncludes operations from the config db")
+        print("\t\u001b[32mbefore(ts)\u001b[0m\t\tOnly includes operations from a time less than or equal to the timestamp ts")
+        print("\t\u001b[32mafter(ts)\u001b[0m\t\tOnly includes operations from a time greater than or equal to the timestamp ts")
+        print("\t\u001b[32mbeforeWall(ts)\u001b[0m\t\tOnly includes operations from a time less than or equal to the wall time ts")
+        print("\t\u001b[32mafterWall(ts)\u001b[0m\t\tOnly includes operations from a time greater than or equal to the wall time ts")
+        print("\t\u001b[32mforward()\u001b[0m\t\tEntries are sorted in ascending order (oldest to newest)")
+        print("\t\u001b[32mdb(db)\u001b[0m\t\t\tOnly includes operations where ns is equal to db")
+        print("\t\u001b[32mns(...ns)\u001b[0m\t\tOnly includes operations from the namespace ns. You can include multiple namespaces")
+        print("\t\u001b[32mexcludeDB(db)\u001b[0m\t\tExcludes operations where ns is equal to db")
+        print("\t\u001b[32mexcludeNs(...ns)\u001b[0m\tExcludes operations from the namespace ns. You can exclude multiple namespaces")
+        print("\t\u001b[32mop(opType)\u001b[0m\t\tOnly includes ops of type opType. Valid types are 'n','c','i','u','d'. These are noops, commands, inserts, updates, deletes.")
+        print("\t\u001b[32mcommand(commandName)\u001b[0m\tOnly includes commands of type commandName")
+        print("\t\u001b[32mtxn(txnNumber)\u001b[0m\t\tOnly includes operations with transaction number equal to txnNumber")
+        print("\t\u001b[32mbyID(id)\u001b[0m\t\tShows operations on objects with _id equal to id. Includes 'i', 'u', and 'd' ops, and 'applyOps' commands")
+        print("\t\u001b[32mmatch(query)\u001b[0m\t\tAdd a custom $match stage using query")
+        print("\t\u001b[32mcompact()\u001b[0m\t\tWhen printing, omit most info so objects are smaller. This can omit useful information")
+        print("\t\u001b[32mlimit(n)\u001b[0m\t\tLimit the output to n entries")
+        print("\t\u001b[32mproject(projection)\u001b[0m\tAdd a projection to the output")
+        print("\t\u001b[32mgetPipeline()\u001b[0m\t\tShows the pipeline which will be used to generate the aggregation. Useful for seeing what is happening under the hood")
+        print("\t\u001b[32mcount()\u001b[0m\t\t\tInstead of showing results, print the count of results from the query")
+        print("\t\u001b[32mshow()\u001b[0m\t\t\tPrints the output from the query. Should be the final method called. Can be replaced with .count() or .getPipeline()")
+    }
+
+    includeNoop() {
+        this.noop = true
+        return this
+    }
+
+    includeConfig() {
+        this.config = true
+        return this
+    }
+
+    before(ts) {
+        this.pipeline.push({"$match": {"ts": { "$lte": Timestamp(ts.t, ts.i) }}})
+        return this
+    }
+
+    after(ts) {
+        this.pipeline.push({"$match": {"ts": { "$gte": Timestamp(ts.t, ts.i) }}})
+        return this
+    }
+
+    beforeWall(ts) {
+        this.pipeline.push({"$match": {"wall": { "$lte": ISODate(ts) }}})
+        return this
+    }
+
+    afterWall(ts) {
+        this.pipeline.push({"$match": {"wall": { "$gte": ISODate(ts) }}})
+        return this
+    }
+
+    forward() {
+        this.sort = true
+        return this
+    }
+
+    db(db) {
+        let match = {
+            "$match": {
+                "$or": [
+                    {"ns": {"$regex": db+"\..*"}},
+                    {"o.applyOps.ns": {"$regex": db+"\..*"}}
+                ]
+            }
+        }
+
+        this.pipeline.push(match)
+        return this
+    }
+
+    ns(...namespaces) {
+        let match = {
+            "$match": {
+                "$or": [
+                    {"ns": {"$in": namespaces}},
+                    {"o.applyOps.ns": {"$in": namespaces}},
+                    {"_temp_ns": {"$in": namespaces}}
+                ]
+            }
+        }
+
+        this.pipeline.push(match)
+        return this
+    }
+
+    excludeDB(db) {
+        let match = {
+            "$match": {
+                "$nor": [
+                    {"ns": {"$regex": db+"\..*"}},
+                    {"o.applyOps.ns": {"$regex": db+"\..*"}}
+                ]
+            }
+        }
+
+        this.pipeline.push(match)
+        return this
+    }
+
+    excludeNs(...namespaces) {
+        let match = {
+            "$match": {
+                "$nor": [
+                    {"ns": {"$in": namespaces}},
+                    {"o.applyOps.ns": {"$in": namespaces}},
+                    {"_temp_ns": {"$in": namespaces}}
+                ]
+            }
+        }
+
+        this.pipeline.push(match)
+        return this
+    }
+
+    op(op) {
+        let match = {
+            "$match": {
+                "$or": [
+                    {"op": op},
+                    {"o.applyOps.op": op}
+                ]
+            }
+        }
+
+        this.pipeline.push({"$match": {"op": op}})
+        return this
+    }
+
+    command(c) {
+        let fieldName = "o." + c 
+        let match = {}
+        match[fieldName] = {"$exists": true}
+        match.op = "c"
+
+        let matchApplyOps = {}
+        let fieldNameApplyOps = "o.applyOps.o." + c 
+        matchApplyOps[fieldNameApplyOps] = {"$exists": true}
+        matchApplyOps["op.applyOps.op"] = "c"
+
+        this.pipeline.push({"$match": { "$or": [match, matchApplyOps] }})
+        return this
+    }
+
+    txn(txnNumber, lsid) {
+        this.pipeline.push({"$match": {"txnNumber": txnNumber, "lsid.id": new UUID(lsid)}})
+        return this
+    }
+
+    match(query) {
+        this.pipeline.push({"$match": query})
+        return this
+    }
+
+    project(projection) {
+        this.projection = projection
+        return this
+    }
+
+    byID(id) {
+        if (typeof id === 'string' || id instanceof String) {
+            if (id.length == 24) {
+                // assume this string should be an ObjectID
+                id = ObjectId(id)
+            }
+        }
+
+        let match = {
+            "$match": {
+                "$or": [
+                    {"o._id": id},
+                    {"o2._id": id},
+                    {"o.applyOps.o._id": id},
+                    {"o.applyOps.o2._id": id}
+                ]
+            }
+        }
+
+        this.pipeline.push(match)
+        return this
+    }
+
+    getPipeline() {
+        let addTempNS = { "$addFields":
+            {
+                "_temp_ns": 
+                    {
+                        "$concat": [
+                            {
+                                $first: {$split: ["$ns", "."]}
+                            }, 
+                            ".", 
+                            {
+                                $convert: {
+                                    "input": {$getField: {field: "v", input: {$first: { $objectToArray: "$$ROOT.o" }}}},
+                                    "to": "string",
+                                    "onError": "",
+                                    "onNull": ""
+                                }
+                            }
+                        ]
+                    }
+            }
+        }
+
+        this.pipeline.unshift(addTempNS)
+
+        if (!this.config) {
+            this.pipeline.unshift({"$match": {"ns": {"$not": {"$regex": "config\..*"}}}})
+        }
+
+        if (!this.noop) {
+            this.pipeline.unshift({"$match": {"op": {"$ne": "n"}}})
+        }
+
+        if (this.shouldCompact) {
+            let addFields = {
+                "op": {"$concat": ["$op", " on ", "$ns"]}
+            }
+
+            this.pipeline.push({"$addFields": addFields})
+
+            let projection = {
+                "lsid": false,
+                "txnNumber": false,
+                "t": false,
+                "v": false,
+                "prevOpTime": false,
+                "stmtId": false,
+                "ui": false,
+                "postImageOpTime": false,
+                "wall": false,
+                "ns": false
+            }
+
+            this.pipeline.push({"$project": projection})
+        }
+
+        if (!this.sort) {
+            this.pipeline.push({"$sort": {"ts": -1}})
+        }
+
+        if (this.limitNum) {
+            this.pipeline.push({"$limit": this.limitNum})
+        }
+
+        if (this.projection) {
+            this.pipeline.push({"$project": this.projection})
+        }
+
+        this.pipeline.push({"$project": {"_temp_ns": false}})
+
+        return this.pipeline
+    }
+
+    compact() {
+        this.shouldCompact = true
+        return this
+    }
+
+    limit(n) {
+        this.limitNum = n
+        return this
+    }
+
+    show() {
+        let res = this.oplog.aggregate(this.getPipeline(), this.options) 
+        print(res)
+    }
+
+    count() {
+        let p = this.getPipeline()
+        p.push({ "$count": "count" })
+        let res = this.oplog.aggregate(p, this.options)
+        print(res)
+    }
+    
+}
+
+function ops() {
+    return new Oplog()
+}
+
+function batchSize(n) {
+    config.set("displayBatchSize", n)
+}
+
+function resetBatchSize() {
+    config.reset("displayBatchSize")
+}
+
+config.set("inspectDepth", Infinity)
