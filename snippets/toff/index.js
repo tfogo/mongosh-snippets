@@ -81,7 +81,7 @@ class Oplog {
         print("\t\u001b[32mexcludeNs(...ns)\u001b[0m\tExcludes operations from the namespace ns. You can exclude multiple namespaces")
         print("\t\u001b[32mop(opType)\u001b[0m\t\tOnly includes ops of type opType. Valid types are 'n','c','i','u','d'. These are noops, commands, inserts, updates, deletes.")
         print("\t\u001b[32mcommand(commandName)\u001b[0m\tOnly includes commands of type commandName")
-        print("\t\u001b[32mtxn(txnNumber)\u001b[0m\t\tOnly includes operations with transaction number equal to txnNumber")
+        print("\t\u001b[32mtxn(txnNumber, lsid)\u001b[0m\tOnly includes operations with transaction number equal to txnNumber and lsid. lsid is the lsid.id UUID value in the oplog")
         print("\t\u001b[32mbyID(id)\u001b[0m\t\tShows operations on objects with _id equal to id. Includes 'i', 'u', and 'd' ops, and 'applyOps' commands")
         print("\t\u001b[32mmatch(query)\u001b[0m\t\tAdd a custom $match stage using query")
         print("\t\u001b[32mcompact()\u001b[0m\t\tWhen printing, omit most info so objects are smaller. This can omit useful information")

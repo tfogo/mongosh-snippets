@@ -201,8 +201,8 @@ Only includes ops of type opType. Valid types are 'n','c','i','u','d'. These are
 Only includes commands of type commandName
 <br />
  
-`txn(txnNumber)`          
-Only includes operations with transaction number equal to txnNumber
+`txn(txnNumber, lsid)`          
+Only includes operations with transaction number equal to txnNumber and lsid. lsid is the lsid.id UUID value in the oplog
 <br />
  
 `byID(id)`                
