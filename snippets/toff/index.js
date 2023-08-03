@@ -12,8 +12,9 @@ class Oplog {
     }
 
     help() {
+        print("\u001b[1m\nToff: Tim's Oplog Filtering Functions.\u001b[0m")
         print("\u001b[1m\nUSAGE:\u001b[0m")
-        print("\tops() helps printing oplog entries. Chain commands together then .show().")
+        print("\ttoff() helps printing oplog entries. Chain commands together then .show().")
         print("\tBy default noops and the config db are ommitted.")
         print("\tWhen filtering by namespace, db, command, _id, and op, we search both top-level")
         print("\toperations and sub-operations in applyOps. That way you do not miss anything")
@@ -21,50 +22,50 @@ class Oplog {
 
         print("\u001b[1mEXAMPLES:\u001b[0m")
         print("\tShow the oplog. By default it's in reverse timestamp order (newest to oldest):")
-        print("\t\u001b[32mops().show()\u001b[0m\n")
+        print("\t\u001b[32mtoff().show()\u001b[0m\n")
 
         print("\tShow the last 5 oplog entries:")
-        print("\t\u001b[32mops().limit(5).show()\u001b[0m\n")
+        print("\t\u001b[32mtoff().limit(5).show()\u001b[0m\n")
 
         print("\tShow the oplog from oldest to newest:")
-        print("\t\u001b[32mops().forward().show()\u001b[0m\n")
+        print("\t\u001b[32mtoff().forward().show()\u001b[0m\n")
 
         print("\tShow the oplog from oldest to newest from timestamp { t: 1690828162, i: 786 }:")
-        print("\t\u001b[32mops().forward().after({ t: 1690828162, i: 786 }).show()\u001b[0m\n")
+        print("\t\u001b[32mtoff().forward().after({ t: 1690828162, i: 786 }).show()\u001b[0m\n")
 
         print("\tShow the oplog from oldest to newest before timestamp { t: 1690828162, i: 786 }:")
-        print("\t\u001b[32mops().forward().before({ t: 1690828162, i: 786 }).show()\u001b[0m\n")
+        print("\t\u001b[32mtoff().forward().before({ t: 1690828162, i: 786 }).show()\u001b[0m\n")
 
         print("\tShow the oplog between wall times \"2023-07-31T18:29:19.037889997Z\" and \"2023-07-31T18:29:19.081624304Z\":")
         print("\tNote: wall times from mongosync logs may not correspond directly to the wall times in the oplog.")
-        print("\t\u001b[32mops().afterWall(\"2023-07-31T18:29:19.037889997Z\").beforeWall(\"2023-07-31T18:29:19.081624304Z\").show()\u001b[0m\n")
+        print("\t\u001b[32mtoff().afterWall(\"2023-07-31T18:29:19.037889997Z\").beforeWall(\"2023-07-31T18:29:19.081624304Z\").show()\u001b[0m\n")
 
         print("\tShow only inserts into the partitions collection:")
-        print("\t\u001b[32mops().ns(\"mongosync_reserved_for_internal_use.partitions\").op(\"i\").show()\u001b[0m\n")
+        print("\t\u001b[32mtoff().ns(\"mongosync_reserved_for_internal_use.partitions\").op(\"i\").show()\u001b[0m\n")
 
         print("\tShow only createIndexes commands:")
-        print("\t\u001b[32mops().command(\"createIndexes\").show()\u001b[0m\n")
+        print("\t\u001b[32mtoff().command(\"createIndexes\").show()\u001b[0m\n")
 
         print("\tShow only the mongosync_reserved_for_internal_use database except for globalState:")
-        print("\t\u001b[32mops().db(\"mongosync_reserved_for_internal_use\").excludeNs(\"globalState\").show()\u001b[0m\n")
+        print("\t\u001b[32mtoff().db(\"mongosync_reserved_for_internal_use\").excludeNs(\"globalState\").show()\u001b[0m\n")
 
         print("\tShow all operations on the admin.$cmd namespace:")
-        print("\t\u001b[32mops().ns(\"admin.$cmd\").show()\u001b[0m\n")
+        print("\t\u001b[32mtoff().ns(\"admin.$cmd\").show()\u001b[0m\n")
 
         print("\tFind all ops in transaction 6753 for lsid.id \"d94483c0-5d07-4b05-8b9b-a0c18cc495fa\":")
-        print("\t\u001b[32mops().txn(6753, \"d94483c0-5d07-4b05-8b9b-a0c18cc495fa\").show()\u001b[0m\n")
+        print("\t\u001b[32mtoff().txn(6753, \"d94483c0-5d07-4b05-8b9b-a0c18cc495fa\").show()\u001b[0m\n")
 
         print("\tFind operations on docs with _id \"64c7f9f11a4c236a31f5c6c4\":")
-        print("\t\u001b[32mops().byID(\"64c7f9f11a4c236a31f5c6c4\").show()\u001b[0m\n")
+        print("\t\u001b[32mtoff().byID(\"64c7f9f11a4c236a31f5c6c4\").show()\u001b[0m\n")
 
         print("\tCount how many times the document with _id 8 was inserted into test.melon:")
-        print("\t\u001b[32mops().op(\"i\").ns(\"test.melon\").byID(8).count()\u001b[0m\n")
+        print("\t\u001b[32mtoff().op(\"i\").ns(\"test.melon\").byID(8).count()\u001b[0m\n")
 
         print("\tUse a projection to show only the timestamps for ops where _id 8 was inserted into test.melon:")
-        print("\t\u001b[32mops().op(\"i\").ns(\"test.melon\").byID(8).project({\"ts\":1}).show()\u001b[0m\n")
+        print("\t\u001b[32mtoff().op(\"i\").ns(\"test.melon\").byID(8).project({\"ts\":1}).show()\u001b[0m\n")
 
         print("\tUse a custom $match query to find updates which set the field a to 10:")
-        print("\t\u001b[32mops().op(\"u\").match({\"o.a\": 10}).show()\u001b[0m\n")
+        print("\t\u001b[32mtoff().op(\"u\").match({\"o.a\": 10}).show()\u001b[0m\n")
         
         print("\u001b[1mREFERENCE:\u001b[0m")
         print("\t\u001b[32mincludeNoop()\u001b[0m\t\tIncludes noop operations")
@@ -359,5 +360,3 @@ function batchSize(n) {
 function resetBatchSize() {
     config.reset("displayBatchSize")
 }
-
-config.set("inspectDepth", Infinity)
