@@ -348,7 +348,7 @@ class Oplog {
     
 }
 
-function ops() {
+function toff() {
     return new Oplog()
 }
 
