@@ -1,4 +1,4 @@
-# Toff: Tim's Opglog Filtering Functions
+# Toff: Tim's Oplog Filtering Functions
 
 ![Bertie Wooster](bertie.gif)
 
