@@ -54,7 +54,7 @@ config.reset("displayBatchSize")
 
 ## Examples
 
-Show the oplog. By default it's in reverse timestamp order (newest to oldest):
+Show the oplog. By default it's in timestamp order (oldest to newest):
 ```js
 toff().show()
 ```
@@ -66,21 +66,21 @@ toff().limit(5).show()
 ```
 <br />
 
-Show the oplog from oldest to newest:
+Show the oplog from newest to oldest:
 ```js
-toff().forward().show()
+toff().reverse().show()
 ```
 <br />
 
-Show the oplog from oldest to newest from timestamp `{ t: 1690828162, i: 786 }`:
+Show the oplog from newest to oldest from timestamp `{ t: 1690828162, i: 786 }`:
 ```js
-toff().forward().after({ t: 1690828162, i: 786 }).show()
+toff().reverse().after({ t: 1690828162, i: 786 }).show()
 ```
 <br />
 
-Show the oplog from oldest to newest before timestamp `{ t: 1690828162, i: 786 }`:
+Show the oplog from newest to oldest before timestamp `{ t: 1690828162, i: 786 }`:
 ```js
-toff().forward().before({ t: 1690828162, i: 786 }).show()
+toff().reverse().before({ t: 1690828162, i: 786 }).show()
 ```
 <br />
 
@@ -173,8 +173,8 @@ Only includes operations from a time less than or equal to the wall time ts
 Only includes operations from a time greater than or equal to the wall time ts
 <br />
  
-`forward()`               
-Entries are sorted in ascending order (oldest to newest)
+`reverse()`               
+Entries are sorted in descending order (newest to oldest)
 <br />
  
 `db(db)`                  

@@ -21,20 +21,20 @@ class Oplog {
         print("\tthat is part of a transaction.\n")
 
         print("\u001b[1mEXAMPLES:\u001b[0m")
-        print("\tShow the oplog. By default it's in reverse timestamp order (newest to oldest):")
+        print("\tShow the oplog. By default it's in timestamp order (oldest to newest):")
         print("\t\u001b[32mtoff().show()\u001b[0m\n")
 
         print("\tShow the last 5 oplog entries:")
         print("\t\u001b[32mtoff().limit(5).show()\u001b[0m\n")
 
-        print("\tShow the oplog from oldest to newest:")
-        print("\t\u001b[32mtoff().forward().show()\u001b[0m\n")
+        print("\tShow the oplog from newest to oldest:")
+        print("\t\u001b[32mtoff().reverse().show()\u001b[0m\n")
 
-        print("\tShow the oplog from oldest to newest from timestamp { t: 1690828162, i: 786 }:")
-        print("\t\u001b[32mtoff().forward().after({ t: 1690828162, i: 786 }).show()\u001b[0m\n")
+        print("\tShow the oplog from newest to oldest from timestamp { t: 1690828162, i: 786 }:")
+        print("\t\u001b[32mtoff().reverse().after({ t: 1690828162, i: 786 }).show()\u001b[0m\n")
 
-        print("\tShow the oplog from oldest to newest before timestamp { t: 1690828162, i: 786 }:")
-        print("\t\u001b[32mtoff().forward().before({ t: 1690828162, i: 786 }).show()\u001b[0m\n")
+        print("\tShow the oplog from newest to oldest before timestamp { t: 1690828162, i: 786 }:")
+        print("\t\u001b[32mtoff().reverse().before({ t: 1690828162, i: 786 }).show()\u001b[0m\n")
 
         print("\tShow the oplog between wall times \"2023-07-31T18:29:19.037889997Z\" and \"2023-07-31T18:29:19.081624304Z\":")
         print("\tNote: wall times from mongosync logs may not correspond directly to the wall times in the oplog.")
@@ -74,7 +74,7 @@ class Oplog {
         print("\t\u001b[32mafter(ts)\u001b[0m\t\tOnly includes operations from a time greater than or equal to the timestamp ts")
         print("\t\u001b[32mbeforeWall(ts)\u001b[0m\t\tOnly includes operations from a time less than or equal to the wall time ts")
         print("\t\u001b[32mafterWall(ts)\u001b[0m\t\tOnly includes operations from a time greater than or equal to the wall time ts")
-        print("\t\u001b[32mforward()\u001b[0m\t\tEntries are sorted in ascending order (oldest to newest)")
+        print("\t\u001b[32mreverse()\u001b[0m\t\tEntries are sorted in descending order (newest to oldest)")
         print("\t\u001b[32mdb(db)\u001b[0m\t\t\tOnly includes operations where ns is equal to db")
         print("\t\u001b[32mns(...ns)\u001b[0m\t\tOnly includes operations from the namespace ns. You can include multiple namespaces")
         print("\t\u001b[32mexcludeDB(db)\u001b[0m\t\tExcludes operations where ns is equal to db")
@@ -122,7 +122,7 @@ class Oplog {
         return this
     }
 
-    forward() {
+    reverse() {
         this.sort = true
         return this
     }
@@ -308,7 +308,7 @@ class Oplog {
             this.pipeline.push({"$project": projection})
         }
 
-        if (!this.sort) {
+        if (this.sort) {
             this.pipeline.push({"$sort": {"ts": -1}})
         }
 
