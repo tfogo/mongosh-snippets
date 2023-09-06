@@ -6,7 +6,7 @@ The `toff()` method helps printing oplog entries. Chain commands together to fil
 
 ## Installation
 
-Run:
+Run `mongosh`. Then in the `mongosh` shell run the following commands:
 
 ```js
 config.set('snippetIndexSourceURLs', 'https://github.com/tfogo/mongosh-snippets/raw/main/index.bson.br;' + config.get('snippetIndexSourceURLs'))
