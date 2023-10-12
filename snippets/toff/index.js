@@ -340,6 +340,31 @@ class Oplog {
         print(res)
     }
 
+    get() {
+        let res = this.oplog.aggregate(this.getPipeline(), this.options) 
+        return res
+    }
+
+    printField(key) {
+        let res = this.oplog.aggregate(this.getPipeline(), this.options) 
+        
+        res.forEach(e => {this.getNestedValue(e,key)})
+    }
+
+    getNestedValue(obj, keys) {
+        let current = obj;
+        const keyArray = keys.split('.');
+        
+        for (let key of keyArray) {
+            if (current[key] === undefined) {
+                return undefined;
+            }
+            current = current[key];
+        }
+        
+        return current;
+    }
+
     count() {
         let p = this.getPipeline()
         p.push({ "$count": "count" })
