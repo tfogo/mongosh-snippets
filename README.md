@@ -128,6 +128,13 @@ toff().byID("64c7f9f11a4c236a31f5c6c4").show()
 ```
 <br />
 
+Find operations on docs with _id `"64c7f9f11a4c236a31f5c6c4"` or `"648170059cedcc216ef1d6d8`:
+```js
+toff().byID("64c7f9f11a4c236a31f5c6c4", "648170059cedcc216ef1d6d8").show()
+```
+<br />
+
+
 Count how many times the document with _id 8 was inserted into test.melon:
 ```js
 toff().op("i").ns("test.melon").byID(8).count()
@@ -144,6 +151,13 @@ toff().op("i").ns("test.melon").byID(8).project({"ts":1}).show()
 Use a custom $match query to find updates which set the field a to 10:
 ```js
 toff().op("u").match({"o.a": 10}).show()
+```
+<br />
+
+
+Only print the value of `"o._id"`` for each insert on namespace foo.bar:
+```js
+toff().op("i").ns("foo.bar").printField("o._id")
 ```
 <br />
 
@@ -205,8 +219,8 @@ Only includes commands of type commandName
 Only includes operations with transaction number equal to txnNumber and lsid. lsid is the lsid.id UUID value in the oplog
 <br />
  
-`byID(id)`                
-Shows operations on objects with _id equal to id. Includes 'i', 'u', and 'd' ops, and 'applyOps' commands
+`byID(...id)`                
+Shows operations on objects with _id equal to id. Can specify multiple ids. Includes 'i', 'u', and 'd' ops, and 'applyOps' commands
 <br />
  
 `match(query)`            
@@ -233,7 +247,13 @@ Shows the pipeline which will be used to generate the aggregation. Useful for se
 Instead of showing results, print the count of results from the query
 <br />
  
+`get()`
+Returns the result object from the query. An alternative to show() which allows you to use the result in code if needed
+
+`printField(key)`
+Prints the value of the given key for each matching object. Should be used as an alternative to show()
+
 `show()`                  
-Prints the output from the query. Should be the final method called. Can be replaced with .count() or .getPipeline()
+Prints the output from the query. Should be the final method called. Can be replaced with .get(), .count(), printField() or .getPipeline()
 <br />
  

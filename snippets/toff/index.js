@@ -61,6 +61,9 @@ class Oplog {
         print("\tFind operations on docs with _id \"64c7f9f11a4c236a31f5c6c4\":")
         print("\t\u001b[32mtoff().byID(\"64c7f9f11a4c236a31f5c6c4\").show()\u001b[0m\n")
 
+        print("\tFind operations on docs with _id \"64c7f9f11a4c236a31f5c6c4\" or \"648170059cedcc216ef1d6d8\":")
+        print("\t\u001b[32mtoff().byID(\"64c7f9f11a4c236a31f5c6c4\", \"648170059cedcc216ef1d6d8\").show()\u001b[0m\n")
+
         print("\tCount how many times the document with _id 8 was inserted into test.melon:")
         print("\t\u001b[32mtoff().op(\"i\").ns(\"test.melon\").byID(8).count()\u001b[0m\n")
 
@@ -69,6 +72,9 @@ class Oplog {
 
         print("\tUse a custom $match query to find updates which set the field a to 10:")
         print("\t\u001b[32mtoff().op(\"u\").match({\"o.a\": 10}).show()\u001b[0m\n")
+
+        print("\tOnly print the value of \"o._id\" for each insert on namespace foo.bar:")
+        print("\t\u001b[32mtoff().op(\"i\").ns(\"foo.bar\").printField(\"o._id\")\u001b[0m\n")
         
         print("\u001b[1mREFERENCE:\u001b[0m")
         print("\t\u001b[32mincludeNoop()\u001b[0m\t\tIncludes noop operations")
@@ -93,7 +99,7 @@ class Oplog {
         print("\t\u001b[32mgetPipeline()\u001b[0m\t\tShows the pipeline which will be used to generate the aggregation. Useful for seeing what is happening under the hood")
         print("\t\u001b[32mcount()\u001b[0m\t\t\tInstead of showing results, print the count of results from the query")
         print("\t\u001b[32mget()\u001b[0m\t\t\tReturns the result object from the query. An alternative to show() which allows you to use the result in code if needed")
-        print("\t\u001b[32mprintField(key)\u001b[0m\t\t\tPrints the value of the given key for each matching object. Should be used as an alternative to show()")
+        print("\t\u001b[32mprintField(key)\u001b[0m\t\tPrints the value of the given key for each matching object. Should be used as an alternative to show()")
         print("\t\u001b[32mshow()\u001b[0m\t\t\tPrints the output from the query. Should be the final method called. Can be replaced with .get(), .count(), printField() or .getPipeline()")
     }
 
