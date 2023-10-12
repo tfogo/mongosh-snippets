@@ -13,7 +13,9 @@ class Oplog {
 
     help() {
         print("\u001b[1m\nToff: Tim's Oplog Filtering Functions.\u001b[0m")
-        print("\u001b[1m\nv2.1.0\u001b[0m")
+
+        print("\u001b[1m\nv2.2.0\u001b[0m")
+
         print("\u001b[1m\nUSAGE:\u001b[0m")
         print("\ttoff() helps printing oplog entries. Chain commands together then .show().")
         print("\tBy default noops and the config db are ommitted.")
@@ -253,6 +255,33 @@ class Oplog {
         return this
     }
 
+    byIDs(...ids) {
+        ids.forEach((id, ix) => {
+            if (typeof id === 'string' || id instanceof String) {
+                if (id.length == 24) {
+                    // assume this string should be an ObjectID
+                    id = ObjectId(id)
+                    ids[ix] = id
+                }
+            }
+        })
+        
+
+        let match = {
+            "$match": {
+                "$or": [
+                    {"o._id": {"$in": ids}},
+                    {"o2._id": {"$in": ids}},
+                    {"o.applyOps.o._id": {"$in": ids}},
+                    {"o.applyOps.o2._id": {"$in": ids}}
+                ]
+            }
+        }
+
+        this.pipeline.push(match)
+        return this
+    }
+
     getPipeline() {
         let addTempNS = { "$addFields":
             {
@@ -349,7 +378,7 @@ class Oplog {
     printField(key) {
         let res = this.oplog.aggregate(this.getPipeline(), this.options) 
         
-        res.forEach(e => {this.getNestedValue(e,key)})
+        res.forEach(e => {print(this.getNestedValue(e,key))})
     }
 
     getNestedValue(obj, keys) {
