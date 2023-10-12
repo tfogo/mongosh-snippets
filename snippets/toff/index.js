@@ -85,14 +85,16 @@ class Oplog {
         print("\t\u001b[32mop(opType)\u001b[0m\t\tOnly includes ops of type opType. Valid types are 'n','c','i','u','d'. These are noops, commands, inserts, updates, deletes.")
         print("\t\u001b[32mcommand(commandName)\u001b[0m\tOnly includes commands of type commandName")
         print("\t\u001b[32mtxn(txnNumber, lsid)\u001b[0m\tOnly includes operations with transaction number equal to txnNumber and lsid. lsid is the lsid.id UUID value in the oplog")
-        print("\t\u001b[32mbyID(id)\u001b[0m\t\tShows operations on objects with _id equal to id. Includes 'i', 'u', and 'd' ops, and 'applyOps' commands")
+        print("\t\u001b[32mbyID(...ids)\u001b[0m\t\tShows operations on objects with _id equal to id. Can specify multiple ids. Includes 'i', 'u', and 'd' ops, and 'applyOps' commands")
         print("\t\u001b[32mmatch(query)\u001b[0m\t\tAdd a custom $match stage using query")
         print("\t\u001b[32mcompact()\u001b[0m\t\tWhen printing, omit most info so objects are smaller. This can omit useful information")
         print("\t\u001b[32mlimit(n)\u001b[0m\t\tLimit the output to n entries")
         print("\t\u001b[32mproject(projection)\u001b[0m\tAdd a projection to the output")
         print("\t\u001b[32mgetPipeline()\u001b[0m\t\tShows the pipeline which will be used to generate the aggregation. Useful for seeing what is happening under the hood")
         print("\t\u001b[32mcount()\u001b[0m\t\t\tInstead of showing results, print the count of results from the query")
-        print("\t\u001b[32mshow()\u001b[0m\t\t\tPrints the output from the query. Should be the final method called. Can be replaced with .count() or .getPipeline()")
+        print("\t\u001b[32mget()\u001b[0m\t\t\tReturns the result object from the query. An alternative to show() which allows you to use the result in code if needed")
+        print("\t\u001b[32mprintField(key)\u001b[0m\t\t\tPrints the value of the given key for each matching object. Should be used as an alternative to show()")
+        print("\t\u001b[32mshow()\u001b[0m\t\t\tPrints the output from the query. Should be the final method called. Can be replaced with .get(), .count(), printField() or .getPipeline()")
     }
 
     includeNoop() {
@@ -232,30 +234,7 @@ class Oplog {
         return this
     }
 
-    byID(id) {
-        if (typeof id === 'string' || id instanceof String) {
-            if (id.length == 24) {
-                // assume this string should be an ObjectID
-                id = ObjectId(id)
-            }
-        }
-
-        let match = {
-            "$match": {
-                "$or": [
-                    {"o._id": id},
-                    {"o2._id": id},
-                    {"o.applyOps.o._id": id},
-                    {"o.applyOps.o2._id": id}
-                ]
-            }
-        }
-
-        this.pipeline.push(match)
-        return this
-    }
-
-    byIDs(...ids) {
+    byID(...ids) {
         ids.forEach((id, ix) => {
             if (typeof id === 'string' || id instanceof String) {
                 if (id.length == 24) {
