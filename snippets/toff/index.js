@@ -14,7 +14,7 @@ class Oplog {
     help() {
         print("\u001b[1m\nToff: Tim's Oplog Filtering Functions.\u001b[0m")
 
-        print("\u001b[1m\nv2.2.0\u001b[0m")
+        print("\u001b[1m\nv2.3.0\u001b[0m")
 
         print("\u001b[1m\nUSAGE:\u001b[0m")
         print("\ttoff() helps printing oplog entries. Chain commands together then .show().")
