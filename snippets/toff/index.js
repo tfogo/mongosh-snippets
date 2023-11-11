@@ -14,7 +14,7 @@ class Oplog {
     help() {
         print("\u001b[1m\nToff: Tim's Oplog Filtering Functions.\u001b[0m")
 
-        print("\u001b[1m\nv2.4.0\u001b[0m")
+        print("\u001b[1m\nv2.5.0\u001b[0m")
 
         print("\u001b[1m\nUSAGE:\u001b[0m")
         print("\ttoff() helps printing oplog entries. Chain commands together then .show().")
@@ -482,7 +482,7 @@ class Oplog {
             }
         }
 
-        this.pipeline.push(lookupBeforeTestTs, lookupBeforeTestTs, matchingStage, project)
+        this.pipeline.push(lookupBeforeTestTs, lookupAfterTestTs, matchingStage, project)
         return this
     }
 
