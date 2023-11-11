@@ -386,7 +386,110 @@ class Oplog {
         let res = this.oplog.aggregate(p, this.options)
         print(res)
     }
-    
+
+    byTestName(testName) {
+        let lookupBeforeTestTs = {
+                "$lookup": {
+                    "from": "oplog.rs",
+                    "pipeline": [
+                        {
+                            "$match": {"o.test": testName, "o.hook": "before_test"}
+                        },
+                        {
+                            "$project": {
+                                "ts": 1
+                            }
+                        },
+                        {
+                            "$limit": 1
+                        }
+                    ],
+                    "as": "before_test_ts"
+                }
+            }
+
+        let lookupAfterTestTs = {
+            "$lookup": {
+                "from": "oplog.rs",
+                "pipeline": [
+                    {
+                        "$match": {"o.test": testName, "o.hook": "after_test"}
+                    },
+                    {
+                        "$project": {
+                            "ts": 1
+                        }
+                    },
+                    {
+                        "$limit": 1
+                    }
+                ],
+                "as": "after_test_ts"
+            }
+        }
+
+        let matchingStage = {
+            "$match": {
+                "$expr": {
+                    "$and": [
+                        {"$gt": [
+                                "$ts",
+                                {
+                                    "$let": {
+                                        "vars": {
+                                            "docExpr": {
+                                                "$arrayElemAt": [
+                                                    "$before_test_ts",
+                                                    {
+                                                        "$literal": 0
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "in": "$$docExpr.ts"
+                                    }
+                                }
+                            ]
+                        },
+                        {"$lt": [
+                                "$ts",
+                                {
+                                    "$let": {
+                                        "vars": {
+                                            "docExpr": {
+                                                "$arrayElemAt": [
+                                                    "$after_test_ts",
+                                                    {
+                                                        "$literal": 0
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "in": "$$docExpr.ts"
+                                    }
+                                }
+                            ]
+                        },
+                    ]
+                }
+            }
+        }
+
+        let project = {
+            "$project": {
+                "before_test_ts": 0,
+                "after_test_ts": 0
+            }
+        }
+
+        this.pipeline.push(lookupBeforeTestTs, lookupBeforeTestTs, matchingStage, project)
+        return this
+    }
+
+    explain() {
+        print(this.pipeline)
+    }
+
 }
 
 function toff() {
