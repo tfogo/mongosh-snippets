@@ -101,6 +101,8 @@ class Oplog {
         print("\t\u001b[32mget()\u001b[0m\t\t\tReturns the result object from the query. An alternative to show() which allows you to use the result in code if needed")
         print("\t\u001b[32mprintField(key)\u001b[0m\t\tPrints the value of the given key for each matching object. Should be used as an alternative to show()")
         print("\t\u001b[32mshow()\u001b[0m\t\t\tPrints the output from the query. Should be the final method called. Can be replaced with .get(), .count(), printField() or .getPipeline()")
+        print("\t\u001b[32mbyTestName(testName)\u001b[0m\t\t\tOnly includes operations during the specified test.(working for mongosync passthrough tests only)")
+        print("\t\u001b[32mexplain()\u001b[0m\t\t\tPrints the aggregation pipeline will be executed")
     }
 
     includeNoop() {
