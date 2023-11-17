@@ -14,7 +14,7 @@ class Oplog {
     help() {
         print("\u001b[1m\nToff: Tim's Oplog Filtering Functions.\u001b[0m")
 
-        print("\u001b[1m\nv2.4.0\u001b[0m")
+        print("\u001b[1m\nv2.5.0\u001b[0m")
 
         print("\u001b[1m\nUSAGE:\u001b[0m")
         print("\ttoff() helps printing oplog entries. Chain commands together then .show().")
@@ -101,6 +101,8 @@ class Oplog {
         print("\t\u001b[32mget()\u001b[0m\t\t\tReturns the result object from the query. An alternative to show() which allows you to use the result in code if needed")
         print("\t\u001b[32mprintField(key)\u001b[0m\t\tPrints the value of the given key for each matching object. Should be used as an alternative to show()")
         print("\t\u001b[32mshow()\u001b[0m\t\t\tPrints the output from the query. Should be the final method called. Can be replaced with .get(), .count(), printField() or .getPipeline()")
+        print("\t\u001b[32mbyTestName(testName)\u001b[0m\t\t\tOnly includes operations during the specified test.(working for mongosync passthrough tests only)")
+        print("\t\u001b[32mexplain()\u001b[0m\t\t\tPrints the aggregation pipeline will be executed")
     }
 
     includeNoop() {
@@ -386,7 +388,110 @@ class Oplog {
         let res = this.oplog.aggregate(p, this.options)
         print(res)
     }
-    
+
+    byTestName(testName) {
+        let lookupBeforeTestTs = {
+                "$lookup": {
+                    "from": "oplog.rs",
+                    "pipeline": [
+                        {
+                            "$match": {"o.test": testName, "o.hook": "before_test"}
+                        },
+                        {
+                            "$project": {
+                                "ts": 1
+                            }
+                        },
+                        {
+                            "$limit": 1
+                        }
+                    ],
+                    "as": "before_test_ts"
+                }
+            }
+
+        let lookupAfterTestTs = {
+            "$lookup": {
+                "from": "oplog.rs",
+                "pipeline": [
+                    {
+                        "$match": {"o.test": testName, "o.hook": "after_test"}
+                    },
+                    {
+                        "$project": {
+                            "ts": 1
+                        }
+                    },
+                    {
+                        "$limit": 1
+                    }
+                ],
+                "as": "after_test_ts"
+            }
+        }
+
+        let matchingStage = {
+            "$match": {
+                "$expr": {
+                    "$and": [
+                        {"$gt": [
+                                "$ts",
+                                {
+                                    "$let": {
+                                        "vars": {
+                                            "docExpr": {
+                                                "$arrayElemAt": [
+                                                    "$before_test_ts",
+                                                    {
+                                                        "$literal": 0
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "in": "$$docExpr.ts"
+                                    }
+                                }
+                            ]
+                        },
+                        {"$lt": [
+                                "$ts",
+                                {
+                                    "$let": {
+                                        "vars": {
+                                            "docExpr": {
+                                                "$arrayElemAt": [
+                                                    "$after_test_ts",
+                                                    {
+                                                        "$literal": 0
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "in": "$$docExpr.ts"
+                                    }
+                                }
+                            ]
+                        },
+                    ]
+                }
+            }
+        }
+
+        let project = {
+            "$project": {
+                "before_test_ts": 0,
+                "after_test_ts": 0
+            }
+        }
+
+        this.pipeline.push(lookupBeforeTestTs, lookupAfterTestTs, matchingStage, project)
+        return this
+    }
+
+    explain() {
+        print(this.pipeline)
+    }
+
 }
 
 function toff() {
