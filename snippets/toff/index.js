@@ -96,13 +96,13 @@ class Oplog {
         print("\t\u001b[32mcompact()\u001b[0m\t\tWhen printing, omit most info so objects are smaller. This can omit useful information")
         print("\t\u001b[32mlimit(n)\u001b[0m\t\tLimit the output to n entries")
         print("\t\u001b[32mproject(projection)\u001b[0m\tAdd a projection to the output")
-        print("\t\u001b[32mgetPipeline()\u001b[0m\t\tShows the pipeline which will be used to generate the aggregation. Useful for seeing what is happening under the hood")
+        print("\t\u001b[32mbyTestName(testName)\u001b[0m\t\t\tOnly includes operations during the specified test. (working for mongosync passthrough tests only)")
+        print("\t\u001b[32mgetPipeline()\u001b[0m\t\tReturns the pipeline which will be used to generate the aggregation.")
+        print("\t\u001b[32mexplain()\u001b[0m\t\t\tPrints the pipeline which will be used to generate the aggregation. Useful for seeing what is happening under the hood")
         print("\t\u001b[32mcount()\u001b[0m\t\t\tInstead of showing results, print the count of results from the query")
         print("\t\u001b[32mget()\u001b[0m\t\t\tReturns the result object from the query. An alternative to show() which allows you to use the result in code if needed")
         print("\t\u001b[32mprintField(key)\u001b[0m\t\tPrints the value of the given key for each matching object. Should be used as an alternative to show()")
         print("\t\u001b[32mshow()\u001b[0m\t\t\tPrints the output from the query. Should be the final method called. Can be replaced with .get(), .count(), printField() or .getPipeline()")
-        print("\t\u001b[32mbyTestName(testName)\u001b[0m\t\t\tOnly includes operations during the specified test.(working for mongosync passthrough tests only)")
-        print("\t\u001b[32mexplain()\u001b[0m\t\t\tPrints the aggregation pipeline will be executed")
     }
 
     includeNoop() {
@@ -489,7 +489,7 @@ class Oplog {
     }
 
     explain() {
-        print(this.pipeline)
+        print(this.getPipeline())
     }
 
 }
