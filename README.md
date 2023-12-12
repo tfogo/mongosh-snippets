@@ -52,6 +52,24 @@ toff().show()
 config.reset("displayBatchSize")
 ```
 
+## Development
+
+To work on toff, you can load toff into the shell to test your changes:
+
+```
+load("/path/to/mongosh-snippets/snippets/toff/index.js")
+```
+
+## Releasing
+
+Update the version in `snippets/toff/package.json`. Then after pushing your change, publish a GitHub release. This will tirgger a GitHub action to publish to npm.
+
+If you have access to the npm package and need to publish manually, you can use this command:
+
+```
+npm publish --access public
+```
+
 ## Examples
 
 Show the oplog. By default it's in timestamp order (oldest to newest):

@@ -1,7 +1,7 @@
 {
     "name": "@tfogo/toff",
     "snippetName": "toff",
-    "version": "2.5.0",
+    "version": "2.6.0",
     "description": "Tim's Oplog Filtering Functions",
     "main": "index.js",
     "license": "Apache-2.0",
